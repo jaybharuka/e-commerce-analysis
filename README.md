@@ -190,51 +190,51 @@ The project includes an enhanced Streamlit app with both business analytics and 
 ### 📊 Streamlit Dashboard Screenshots
 
 #### Overview & Business Metrics
-![Dashboard Overview 1](dash-pictures/Screenshot\ 2025-10-30\ 231306.png)
+![Dashboard Overview 1](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231306.png)
 *Main dashboard with business overview and key metrics*
 
-![Dashboard Overview 2](dash-pictures/Screenshot\ 2025-10-30\ 231323.png)
+![Dashboard Overview 2](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231323.png)
 *Sales trends and business performance indicators*
 
-![Dashboard Overview 3](dash-pictures/Screenshot\ 2025-10-30\ 231341.png)
+![Dashboard Overview 3](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231341.png)
 *Business summary with interactive controls*
 
 #### RFM Analysis & Customer Segmentation
-![RFM Analysis](dash-pictures/Screenshot\ 2025-10-30\ 231406.png)
+![RFM Analysis](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231406.png)
 *RFM (Recency, Frequency, Monetary) customer analysis*
 
-![Customer Segmentation 1](dash-pictures/Screenshot\ 2025-10-30\ 231605.png)
+![Customer Segmentation 1](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231605.png)
 *Customer segmentation visualization and insights*
 
-![Customer Segmentation 2](dash-pictures/Screenshot\ 2025-10-30\ 231621.png)
+![Customer Segmentation 2](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231621.png)
 *Detailed segmentation metrics and distribution*
 
 #### Market Basket & Product Analysis
-![Market Basket Analysis](dash-pictures/Screenshot\ 2025-10-30\ 231651.png)
+![Market Basket Analysis](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231651.png)
 *Product association rules and market basket insights*
 
-![Product Analysis](dash-pictures/Screenshot\ 2025-10-30\ 231709.png)
+![Product Analysis](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231709.png)
 *Top products and product performance metrics*
 
 #### Advanced ML Models
-![Sales Forecasting](dash-pictures/Screenshot\ 2025-10-30\ 231729.png)
+![Sales Forecasting](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231729.png)
 *Sales forecast with Prophet time series prediction*
 
-![Churn Prediction](dash-pictures/Screenshot\ 2025-10-30\ 231831.png)
+![Churn Prediction](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231831.png)
 *Customer churn risk prediction and analysis*
 
-![Churn Details](dash-pictures/Screenshot\ 2025-10-30\ 231850.png)
+![Churn Details](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231850.png)
 *Detailed churn prediction metrics and risk distribution*
 
 #### Product Recommendations
-![Product Recommendations 1](dash-pictures/Screenshot\ 2025-10-30\ 231902.png)
+![Product Recommendations 1](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231902.png)
 *AI-powered product recommendations with rankings*
 
-![Product Recommendations 2](dash-pictures/Screenshot\ 2025-10-30\ 231917.png)
+![Product Recommendations 2](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231917.png)
 *Bundle opportunities and cross-sell analysis*
 
 #### Action Items & Summary
-![Action Items](dash-pictures/Screenshot\ 2025-10-30\ 231943.png)
+![Action Items](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231943.png)
 *Actionable recommendations and business insights*
 
 ---
