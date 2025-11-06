@@ -1,0 +1,11 @@
+Feature,Importance
+Frequency,0.15540951
+Transactions90d,0.11239485
+Monetary,0.11122195
+AvgDaysBetween,0.09846308
+PurchaseVariability,0.09669895
+TenureDays,0.09209133
+Recency,0.08768088
+ProductDiversity,0.08670338
+AvgOrderValue,0.08136466
+IsUK,0.07797143
