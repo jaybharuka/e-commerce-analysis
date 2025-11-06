@@ -187,14 +187,70 @@ The project includes an enhanced Streamlit app with both business analytics and 
  
 ## 🖼️ Project Outputs
 
-### Airflow Pipeline Visualization
-![Airflow Pipeline Graph](/output/ecommerce_data_pipeline-Airflow.png)
+### 📊 Streamlit Dashboard Screenshots
+
+#### Overview & Business Metrics
+![Dashboard Overview 1](/dash-pictures/Screenshot%202025-10-30%20231306.png)
+*Main dashboard with business overview and key metrics*
+
+![Dashboard Overview 2](/dash-pictures/Screenshot%202025-10-30%20231323.png)
+*Sales trends and business performance indicators*
+
+![Dashboard Overview 3](/dash-pictures/Screenshot%202025-10-30%20231341.png)
+*Business summary with interactive controls*
+
+#### RFM Analysis & Customer Segmentation
+![RFM Analysis](/dash-pictures/Screenshot%202025-10-30%20231406.png)
+*RFM (Recency, Frequency, Monetary) customer analysis*
+
+![Customer Segmentation 1](/dash-pictures/Screenshot%202025-10-30%20231605.png)
+*Customer segmentation visualization and insights*
+
+![Customer Segmentation 2](/dash-pictures/Screenshot%202025-10-30%20231621.png)
+*Detailed segmentation metrics and distribution*
+
+#### Market Basket & Product Analysis
+![Market Basket Analysis](/dash-pictures/Screenshot%202025-10-30%20231651.png)
+*Product association rules and market basket insights*
+
+![Product Analysis](/dash-pictures/Screenshot%202025-10-30%20231709.png)
+*Top products and product performance metrics*
+
+#### Advanced ML Models
+![Sales Forecasting](/dash-pictures/Screenshot%202025-10-30%20231729.png)
+*Sales forecast with Prophet time series prediction*
+
+![Churn Prediction](/dash-pictures/Screenshot%202025-10-30%20231831.png)
+*Customer churn risk prediction and analysis*
+
+![Churn Details](/dash-pictures/Screenshot%202025-10-30%20231850.png)
+*Detailed churn prediction metrics and risk distribution*
+
+#### Product Recommendations
+![Product Recommendations 1](/dash-pictures/Screenshot%202025-10-30%20231902.png)
+*AI-powered product recommendations with rankings*
+
+![Product Recommendations 2](/dash-pictures/Screenshot%202025-10-30%20231917.png)
+*Bundle opportunities and cross-sell analysis*
+
+#### Action Items & Summary
+![Action Items](/dash-pictures/Screenshot%202025-10-30%20231943.png)
+*Actionable recommendations and business insights*
+
+---
+
+### Architecture Diagrams
+
+#### Airflow Pipeline Visualization
+![Airflow Pipeline Graph](/output/ELT-Pipeline-Workflow.png)
 *Airflow DAG (Directed Acyclic Graph) showing the pipeline workflow*
 
-### Airflow Task Dependencies
+#### Airflow Task Dependencies
 ![Airflow Task Dependencies](/output/ecommerce_data_pipeline-Graph-Airflow.png)
 *Detailed view of task dependencies in the data pipeline*
 
-### Streamlit E-Commerce Dashboard
-![Streamlit Dashboard](/output/E-Commerce-Dashboard-Streamlit.png)
-*Interactive dashboard for e-commerce sales analytics*
+#### RFM Analysis Chart
+![RFM Analysis Chart](/output/rfm.png)
+*RFM segmentation visualization from ML pipeline*
+
+````
