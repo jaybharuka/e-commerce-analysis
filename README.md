@@ -233,9 +233,6 @@ The project includes an enhanced Streamlit app with both business analytics and 
 ![Product Recommendations 2](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231917.png)
 *Bundle opportunities and cross-sell analysis*
 
-#### Action Items & Summary
-![Action Items](https://raw.githubusercontent.com/jaybharuka/e-commerce-analysis/main/dash-pictures/Screenshot%202025-10-30%20231943.png)
-*Actionable recommendations and business insights*
 
 ---
 
