@@ -80,7 +80,7 @@ This project implements an advanced ELT (Extract, Load, Transform) data pipeline
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/AbderrahmaneOd/spark-hive-airflow-ecommerce-pipeline.git
+   https://github.com/jaybharuka/e-commerce-analysis.git
    cd spark-hive-airflow-ecommerce-pipeline
    ```
 
