@@ -10,7 +10,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Replace with your actual GitHub repository URL
-                git branch: 'main', url: 'https://github.com/yourusername/ecommerce-devops-analytics.git'
+                git branch: 'main', url: 'https://github.com/jaybharuka/e-commerce-analysis.git'
             }
         }
 
