@@ -18,7 +18,12 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image..."
-                    sh "docker build -t ${DOCKER_IMAGE} -f streamlit/dockerfile ."
+                    sh """
+                        pwd
+                        ls -la
+                        ls -la streamlit/
+                        docker build -t ${DOCKER_IMAGE} -f streamlit/dockerfile .
+                    """
                 }
             }
         }
@@ -28,11 +33,11 @@ pipeline {
                 script {
                     echo "Running Docker container..."
                     // Stop and remove existing container if it exists
-                    sh "docker stop ${DOCKER_IMAGE} || true"
-                    sh "docker rm ${DOCKER_IMAGE} || true"
-                    
-                    // Run the new container
-                    sh "docker run -d -p ${DOCKER_PORT}:${DOCKER_PORT} --name ${DOCKER_IMAGE} ${DOCKER_IMAGE}"
+                    sh """
+                        docker stop ${DOCKER_IMAGE} 2>/dev/null || true
+                        docker rm ${DOCKER_IMAGE} 2>/dev/null || true
+                        docker run -d -p ${DOCKER_PORT}:${DOCKER_PORT} --name ${DOCKER_IMAGE} ${DOCKER_IMAGE}
+                    """
                 }
             }
         }
