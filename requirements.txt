@@ -1,0 +1,6 @@
+streamlit
+pyhive
+pandas
+plotly
+thrift
+thrift-sasl
