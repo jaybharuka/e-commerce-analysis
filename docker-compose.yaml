@@ -11,7 +11,7 @@ services:
     - 8080:8080 # spark master web ui
     - 8081:8081 # spark slave web ui
     - 4040:4040 # spark driver web ui
-    - 3000:3000 # airflow ui
+    - 3001:3000 # airflow ui
     volumes:
     - hadoop_namenode:/hadoop/dfs/name
     - hadoop_namenode_conda:/root/anaconda
@@ -138,9 +138,11 @@ services:
     container_name: streamlit
     ports:
     - "8501:8501"
-    command : bash -c "streamlit run app.py"
+    command : bash -c "streamlit run app_complete.py"
     volumes:
-    - ./streamlit/app.py:/app/app.py
+    - ./streamlit:/app
+    - ./ml_results:/app/ml_results
+    - ./data:/app/data
 
 volumes:
   hadoop_namenode:

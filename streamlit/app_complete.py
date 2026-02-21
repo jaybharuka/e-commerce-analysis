@@ -5,40 +5,40 @@ import plotly.graph_objects as go
 import plotly.io as pio
 import os
 
-# Configure Plotly default template for dark theme
-pio.templates["custom_dark"] = pio.templates["plotly_dark"]
-pio.templates["custom_dark"].layout.update({
-    'plot_bgcolor': '#2d2d2d',
-    'paper_bgcolor': '#1a1a1a',
-    'font': {'color': '#e0e0e0', 'family': 'Arial, sans-serif', 'size': 12},
-    'title': {'font': {'color': '#90cdf4', 'size': 16, 'family': 'Arial, sans-serif'}},
+# Configure Plotly default template for minimal clean theme
+pio.templates["minimal_clean"] = pio.templates["plotly_white"]
+pio.templates["minimal_clean"].layout.update({
+    'plot_bgcolor': '#FFFFFF',
+    'paper_bgcolor': '#FAFAFA',
+    'font': {'color': '#1F2937', 'family': 'Inter, sans-serif', 'size': 12},
+    'title': {'font': {'color': '#111827', 'size': 16, 'family': 'Inter, sans-serif'}},
     'xaxis': {
-        'gridcolor': '#404040', 
-        'color': '#e0e0e0', 
+        'gridcolor': '#E5E7EB', 
+        'color': '#4B5563', 
         'showgrid': True,
-        'title': {'font': {'color': '#e0e0e0', 'size': 14}},
-        'tickfont': {'color': '#e0e0e0', 'size': 12}
+        'title': {'font': {'color': '#374151', 'size': 14}},
+        'tickfont': {'color': '#6B7280', 'size': 11}
     },
     'yaxis': {
-        'gridcolor': '#404040', 
-        'color': '#e0e0e0', 
+        'gridcolor': '#E5E7EB', 
+        'color': '#4B5563', 
         'showgrid': True,
-        'title': {'font': {'color': '#e0e0e0', 'size': 14}},
-        'tickfont': {'color': '#e0e0e0', 'size': 12}
+        'title': {'font': {'color': '#374151', 'size': 14}},
+        'tickfont': {'color': '#6B7280', 'size': 11}
     },
     'legend': {
-        'bgcolor': 'rgba(45,45,45,0.9)', 
-        'bordercolor': '#606060', 
+        'bgcolor': '#FFFFFF', 
+        'bordercolor': '#E5E7EB', 
         'borderwidth': 1,
-        'font': {'color': '#e0e0e0', 'size': 12}
+        'font': {'color': '#374151', 'size': 11}
     },
     'hoverlabel': {
-        'bgcolor': '#404040',
-        'font': {'color': '#ffffff', 'family': 'Arial, sans-serif', 'size': 13},
-        'bordercolor': '#606060'
+        'bgcolor': '#FFFFFF',
+        'font': {'color': '#111827', 'family': 'Inter, sans-serif', 'size': 12},
+        'bordercolor': '#D1D5DB'
     }
 })
-pio.templates.default = "custom_dark"
+pio.templates.default = "minimal_clean"
 
 # Page configuration
 st.set_page_config(
@@ -52,9 +52,9 @@ st.set_page_config(
 import sys
 import os
 script_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(script_dir)
-ML_RESULTS_DIR = os.path.join(parent_dir, 'ml_results')
-DATA_FILE = os.path.join(parent_dir, 'data', 'data.csv')
+# For Docker: files are mounted directly in /app/
+ML_RESULTS_DIR = os.path.join(script_dir, 'ml_results')
+DATA_FILE = os.path.join(script_dir, 'data', 'data.csv')
 
 # Chart styling for visibility in all modes
 CHART_TEMPLATE = {
@@ -68,256 +68,205 @@ CHART_TEMPLATE = {
 }
 
 def style_chart(fig):
-    """Apply consistent dark theme styling to charts"""
+    """Apply consistent minimal clean styling to charts"""
     fig.update_layout(
-        plot_bgcolor='#2d2d2d',
-        paper_bgcolor='#1a1a1a',
-        font=dict(color='#e0e0e0', family='Arial, sans-serif', size=12),
-        title_font=dict(color='#90cdf4', size=16),
+        plot_bgcolor='#FFFFFF',
+        paper_bgcolor='#FAFAFA',
+        font=dict(color='#1F2937', family='Inter, sans-serif', size=12),
+        title_font=dict(color='#111827', size=16, weight=500),
         xaxis=dict(
-            gridcolor='#404040', 
-            color='#e0e0e0',
-            title_font=dict(color='#e0e0e0', size=14),
-            tickfont=dict(color='#e0e0e0', size=12)
+            gridcolor='#E5E7EB', 
+            color='#4B5563',
+            title_font=dict(color='#374151', size=14),
+            tickfont=dict(color='#6B7280', size=11),
+            linecolor='#D1D5DB'
         ),
         yaxis=dict(
-            gridcolor='#404040', 
-            color='#e0e0e0',
-            title_font=dict(color='#e0e0e0', size=14),
-            tickfont=dict(color='#e0e0e0', size=12)
+            gridcolor='#E5E7EB', 
+            color='#4B5563',
+            title_font=dict(color='#374151', size=14),
+            tickfont=dict(color='#6B7280', size=11),
+            linecolor='#D1D5DB'
         ),
         legend=dict(
-            bgcolor='rgba(45,45,45,0.9)', 
-            bordercolor='#606060', 
+            bgcolor='#FFFFFF', 
+            bordercolor='#E5E7EB', 
             borderwidth=1,
-            font=dict(color='#e0e0e0', size=12)
+            font=dict(color='#374151', size=11)
         ),
         hoverlabel=dict(
-            bgcolor='#404040',
-            font_size=13,
-            font_family='Arial, sans-serif',
-            font_color='#ffffff',
-            bordercolor='#606060'
-        )
+            bgcolor='#FFFFFF',
+            font_size=12,
+            font_family='Inter, sans-serif',
+            font_color='#111827',
+            bordercolor='#D1D5DB'
+        ),
+        margin=dict(l=60, r=40, t=60, b=60)
     )
-    # Update traces to have visible hover text
     fig.update_traces(
         hoverlabel=dict(
-            bgcolor='#404040',
-            font=dict(color='#ffffff', size=13)
+            bgcolor='#FFFFFF',
+            font=dict(color='#111827', size=12)
         )
     )
     return fig
 
-# Custom CSS for dark theme matching
+# Custom CSS for minimal clean design
 st.markdown("""
     <style>
-        /* Dark theme for main content */
-        .main {
-            background-color: #1a1a1a !important;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
         }
         
-        /* Metric cards - dark theme */
+        .main {
+            background-color: #F9FAFB;
+        }
+        
         .stMetric {
-            background-color: #2d2d2d !important;
+            background-color: #FFFFFF;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            border: 1px solid #404040;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            border: 1px solid #E5E7EB;
         }
         
         .stMetric label {
-            color: #b0b0b0 !important;
-            font-weight: 600;
+            color: #6B7280;
+            font-weight: 500;
+            font-size: 14px;
         }
         
         .stMetric [data-testid="stMetricValue"] {
-            color: #ffffff !important;
-            font-weight: 700;
+            color: #111827;
+            font-weight: 600;
         }
         
         .stMetric [data-testid="stMetricDelta"] {
-            color: #90cdf4 !important;
-        }
-        
-        /* Headers - light text on dark */
-        h1, h2, h3, h4, h5, h6 {
-            color: #90cdf4 !important;
-            font-weight: 600;
+            color: #059669;
         }
         
         h1 {
-            font-weight: 700;
-            border-bottom: 3px solid #3182ce;
-            padding-bottom: 10px;
+            color: #111827;
+            font-weight: 600;
+            border-bottom: 2px solid #E5E7EB;
+            padding-bottom: 12px;
         }
         
-        /* All text elements - light on dark */
-        p, span, div, label, .stMarkdown {
-            color: #e0e0e0 !important;
-        }
-        
-        /* Data tables - dark theme */
-        .dataframe {
-            background-color: #2d2d2d !important;
-            color: #e0e0e0 !important;
-        }
-        
-        .dataframe th {
-            background-color: #404040 !important;
-            color: #ffffff !important;
+        h2, h3 {
+            color: #1F2937;
             font-weight: 600;
         }
         
-        .dataframe td {
-            color: #e0e0e0 !important;
-            border-color: #404040 !important;
+        h4, h5, h6 {
+            color: #374151;
+            font-weight: 500;
         }
         
-        /* Tabs - dark theme */
+        p, span, div, label {
+            color: #4B5563;
+        }
+        
+        .dataframe {
+            background-color: #FFFFFF;
+            border: 1px solid #E5E7EB;
+        }
+        
+        .dataframe th {
+            background-color: #F9FAFB;
+            color: #374151;
+            font-weight: 600;
+            border-bottom: 2px solid #E5E7EB;
+        }
+        
+        .dataframe td {
+            color: #4B5563;
+            border-color: #F3F4F6;
+        }
+        
         .stTabs [data-baseweb="tab-list"] {
-            background-color: #2d2d2d !important;
+            gap: 8px;
         }
         
         .stTabs [data-baseweb="tab"] {
-            color: #b0b0b0 !important;
+            color: #6B7280;
             font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
         }
         
         .stTabs [aria-selected="true"] {
-            color: #90cdf4 !important;
-            font-weight: 700;
-            background-color: #404040 !important;
+            color: #111827;
+            font-weight: 600;
+            background-color: #FFFFFF;
+            border: 1px solid #E5E7EB;
         }
         
-        /* Insight boxes - dark theme */
         .insight-box {
-            background-color: #1e3a5f !important;
-            border-left: 4px solid #3182ce;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 5px;
-            color: #e0e0e0 !important;
+            background-color: #EFF6FF;
+            border-left: 3px solid #3B82F6;
+            padding: 16px;
+            margin: 12px 0;
+            border-radius: 6px;
         }
         
         .warning-box {
-            background-color: #3d1f1f !important;
-            border-left: 4px solid #fc8181;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 5px;
-            color: #ffcccc !important;
+            background-color: #FEF2F2;
+            border-left: 3px solid #EF4444;
+            padding: 16px;
+            margin: 12px 0;
+            border-radius: 6px;
         }
         
-        /* Sidebar - darker */
         section[data-testid="stSidebar"] {
-            background-color: #262626 !important;
+            background-color: #FFFFFF;
+            border-right: 1px solid #E5E7EB;
         }
         
-        section[data-testid="stSidebar"] h1,
-        section[data-testid="stSidebar"] h2,
         section[data-testid="stSidebar"] h3 {
-            color: #90cdf4 !important;
+            color: #111827;
         }
         
-        section[data-testid="stSidebar"] .stMarkdown,
-        section[data-testid="stSidebar"] p,
-        section[data-testid="stSidebar"] span,
-        section[data-testid="stSidebar"] div,
-        section[data-testid="stSidebar"] label {
-            color: #d0d0d0 !important;
-        }
-        
-        section[data-testid="stSidebar"] .stRadio label {
-            color: #d0d0d0 !important;
-        }
-        
-        /* Buttons */
         .stButton button {
-            background-color: #3182ce !important;
-            color: #ffffff !important;
+            background-color: #3B82F6;
+            color: #FFFFFF;
             border: none;
             font-weight: 500;
+            border-radius: 6px;
+            padding: 8px 16px;
         }
         
         .stButton button:hover {
-            background-color: #2c5282 !important;
+            background-color: #2563EB;
         }
         
-        /* Download buttons */
         .stDownloadButton button {
-            background-color: #48bb78 !important;
-            color: #ffffff !important;
+            background-color: #10B981;
+            color: #FFFFFF;
+            border-radius: 6px;
         }
         
-        /* Selectbox and multiselect */
+        .stDownloadButton button:hover {
+            background-color: #059669;
+        }
+        
         .stSelectbox label,
         .stMultiSelect label,
         .stSlider label,
         .stDateInput label {
-            color: #e0e0e0 !important;
-            font-weight: 600;
-        }
-        
-        /* Input fields */
-        .stSelectbox div[data-baseweb="select"] {
-            background-color: #2d2d2d !important;
-        }
-        
-        .stMultiSelect div[data-baseweb="select"] {
-            background-color: #2d2d2d !important;
-        }
-        
-        /* Expander */
-        .streamlit-expanderHeader {
-            background-color: #2d2d2d !important;
-            color: #e0e0e0 !important;
-            font-weight: 600;
-        }
-        
-        /* Info, warning, success boxes */
-        .stAlert {
-            background-color: #2d2d2d !important;
-            color: #e0e0e0 !important;
-        }
-        
-        /* Override any light text on dark backgrounds */
-        [data-testid="stMarkdownContainer"] {
-            color: #e0e0e0 !important;
-        }
-        
-        /* Ensure table headers are visible */
-        thead tr th {
-            background-color: #404040 !important;
-            color: #ffffff !important;
-            font-weight: 600 !important;
-            border-color: #505050 !important;
-        }
-        
-        tbody tr td {
-            color: #e0e0e0 !important;
-            border-color: #404040 !important;
-        }
-        
-        /* Date input */
-        .stDateInput input {
-            background-color: #2d2d2d !important;
-            color: #e0e0e0 !important;
-        }
-        
-        /* Slider */
-        .stSlider {
-            color: #e0e0e0 !important;
+            color: #374151;
+            font-weight: 500;
         }
     </style>
 """, unsafe_allow_html=True)
 
 # Header
-st.title("📊 E-Commerce Analytics Platform")
+st.title("⬡ E-Commerce Analytics Platform")
 
 # Sidebar
 with st.sidebar:
-    st.markdown("### 🎛️ Control Panel")
+    st.markdown("### ◆ Control Panel")
     
     st.markdown("---")
     
@@ -325,31 +274,31 @@ with st.sidebar:
     results_exist = os.path.exists(ML_RESULTS_DIR)
     if results_exist:
         files = [f for f in os.listdir(ML_RESULTS_DIR) if f.endswith('.csv')]
-        st.markdown(f"**System Status:** ✅ Active")
+        st.markdown(f"**System Status:** ● Active")
         st.markdown(f"**Models:** {len(files)} | **Last Update:** Today")
     else:
-        st.markdown("**System Status:** ⚠️ Pending")
+        st.markdown("**System Status:** ○ Pending")
     
     st.markdown("---")
     
     # Quick Actions
-    st.markdown("### ⚡ Quick Actions")
-    if st.button("🔄 Refresh Data"):
+    st.markdown("### ▸ Quick Actions")
+    if st.button("↻ Refresh Data"):
         st.cache_data.clear()
         st.rerun()
     
     st.markdown("---")
-    st.markdown("### 📖 Documentation")
+    st.markdown("### ≡ Documentation")
     st.markdown("""
-    - [Quick Start Guide](QUICK_START.md)
-    - [ML Approach](ML_DIRECT_APPROACH_SUCCESS.md)
-    - [Setup Guide](SETUP_GUIDE.md)
+    - Quick Start Guide
+    - ML Approach
+    - Setup Guide
     """)
 
 st.markdown("---")
 
 # ================== SECTION 1: BUSINESS OVERVIEW ==================
-st.header("📈 Business Overview")
+st.header("▸ Business Overview")
 
 try:
     # Load and process data
@@ -384,7 +333,7 @@ try:
     st.markdown("---")
     
     # Date Range Filter
-    st.subheader("🔍 Data Filters")
+    st.subheader("○ Data Filters")
     col_filter1, col_filter2, col_filter3 = st.columns([2, 2, 1])
     
     with col_filter1:
@@ -423,7 +372,7 @@ try:
     st.markdown("---")
     
     # Visualizations in tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 Sales Analytics", "🌍 Geographic Analysis", "📦 Product Insights", "📅 Temporal Trends"])
+    tab1, tab2, tab3, tab4 = st.tabs(["● Sales Analytics", "● Geographic Analysis", "● Product Insights", "● Temporal Trends"])
     
     with tab1:
         col1, col2 = st.columns(2)
@@ -441,7 +390,7 @@ try:
                 title='Daily Revenue',
                 markers=True
             )
-            fig_trend.update_traces(line_color='#3182ce', line_width=2)
+            fig_trend.update_traces(line_color='#3B82F6', line_width=2)
             fig_trend = style_chart(fig_trend)
             fig_trend.update_layout(hovermode='x unified')
             st.plotly_chart(fig_trend, use_container_width=True)
@@ -457,8 +406,7 @@ try:
                 x='YearMonth',
                 y='TotalAmount',
                 title='Monthly Revenue',
-                color='TotalAmount',
-                color_continuous_scale='Blues'
+                color_discrete_sequence=['#3B82F6']
             )
             fig_monthly = style_chart(fig_monthly)
             fig_monthly.update_layout(xaxis_tickangle=-45)
@@ -478,8 +426,7 @@ try:
                 y='Country',
                 orientation='h',
                 title='Revenue by Country',
-                color='TotalAmount',
-                color_continuous_scale='Viridis'
+                color_discrete_sequence=['#10B981']
             )
             fig_country = style_chart(fig_country)
             st.plotly_chart(fig_country, use_container_width=True)
@@ -495,7 +442,7 @@ try:
                 values='Customers',
                 names='Country',
                 title='Customer Distribution',
-                color_discrete_sequence=px.colors.sequential.RdBu
+                color_discrete_sequence=['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316']
             )
             fig_cust_country = style_chart(fig_cust_country)
             st.plotly_chart(fig_cust_country, use_container_width=True)
@@ -514,8 +461,7 @@ try:
                 y='Description',
                 orientation='h',
                 title='Products by Quantity Sold',
-                color='Quantity',
-                color_continuous_scale='Purples'
+                color_discrete_sequence=['#8B5CF6']
             )
             fig_prod_qty = style_chart(fig_prod_qty)
             st.plotly_chart(fig_prod_qty, use_container_width=True)
@@ -531,8 +477,7 @@ try:
                 y='Description',
                 orientation='h',
                 title='Products by Revenue',
-                color='TotalAmount',
-                color_continuous_scale='Greens'
+                color_discrete_sequence=['#10B981']
             )
             fig_prod_rev = style_chart(fig_prod_rev)
             st.plotly_chart(fig_prod_rev, use_container_width=True)
@@ -552,8 +497,7 @@ try:
                 x='DayOfWeek',
                 y='TotalAmount',
                 title='Revenue by Day of Week',
-                color='TotalAmount',
-                color_continuous_scale='Teal'
+                color_discrete_sequence=['#14B8A6']
             )
             fig_day = style_chart(fig_day)
             st.plotly_chart(fig_day, use_container_width=True)
@@ -571,13 +515,13 @@ try:
                 title='Revenue by Hour',
                 markers=True
             )
-            fig_hour.update_traces(line_color='#e53e3e', line_width=3)
+            fig_hour.update_traces(line_color='#EF4444', line_width=2)
             fig_hour = style_chart(fig_hour)
             st.plotly_chart(fig_hour, use_container_width=True)
     
     # Data export
     st.markdown("---")
-    st.subheader("📥 Data Export")
+    st.subheader("⬇ Data Export")
     col1, col2 = st.columns([3, 1])
     with col1:
         st.info(f"Filtered dataset contains {len(filtered_df):,} transactions")
@@ -595,11 +539,11 @@ except Exception as e:
 st.markdown("---")
 
 # ================== SECTION 2: MACHINE LEARNING INSIGHTS ==================
-st.header("🤖 Machine Learning Insights")
+st.header("▸ Machine Learning Insights")
 st.markdown("**Advanced analytics powered by predictive models and clustering algorithms**")
 
 # RFM Analysis
-st.subheader("💎 RFM Analysis: Customer Value Segmentation")
+st.subheader("◆ RFM Analysis: Customer Value Segmentation")
 st.markdown("**Model Target:** Segments customers by Recency (last purchase), Frequency (purchase count), and Monetary value (total spent) to identify high-value customers and churn risk.")
 rfm_file = os.path.join(ML_RESULTS_DIR, 'rfm_analysis.csv')
 
@@ -634,7 +578,7 @@ if os.path.exists(rfm_file):
                 values='Count',
                 names='Segment',
                 title='Customer Segment Distribution',
-                color_discrete_sequence=px.colors.sequential.Plasma,
+                color_discrete_sequence=['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
                 hole=0.3
             )
             fig_seg = style_chart(fig_seg)
@@ -651,7 +595,7 @@ if os.path.exists(rfm_file):
                 y='Customer Count',
                 title='Churn Risk Distribution',
                 color='Risk Level',
-                color_discrete_map={'Low': '#48bb78', 'Medium': '#ed8936', 'High': '#f56565'}
+                color_discrete_map={'Low': '#10B981', 'Medium': '#F59E0B', 'High': '#EF4444'}
             )
             fig_risk = style_chart(fig_risk)
             st.plotly_chart(fig_risk, use_container_width=True)
@@ -663,14 +607,14 @@ if os.path.exists(rfm_file):
                 x='RFM_Score',
                 title='RFM Score Distribution',
                 nbins=30,
-                color_discrete_sequence=['#4299e1']
+                color_discrete_sequence=['#3B82F6']
             )
             fig_score.update_layout(showlegend=False)
             fig_score = style_chart(fig_score)
             st.plotly_chart(fig_score, use_container_width=True)
         
         # Detailed segment analysis
-        with st.expander("📊 Detailed Segment Metrics"):
+        with st.expander("▸ Detailed Segment Metrics"):
             segment_metrics = rfm_data.groupby('RFM_Segment').agg({
                 'CustomerID': 'count',
                 'Recency': 'mean',
@@ -683,7 +627,7 @@ if os.path.exists(rfm_file):
             st.dataframe(segment_metrics, use_container_width=True)
         
         # Champions list
-        with st.expander("🏆 Top 20 Champions (Most Valuable Customers)"):
+        with st.expander("▸ Top 20 Champions (Most Valuable Customers)"):
             champions_df = rfm_data[rfm_data['RFM_Segment'] == 'Champions'].nlargest(20, 'RFM_Score')
             display_cols = ['CustomerID', 'Recency', 'Frequency', 'Monetary', 'RFM_Score']
             st.dataframe(champions_df[display_cols], use_container_width=True, hide_index=True)
@@ -707,7 +651,7 @@ else:
 st.markdown("---")
 
 # Customer Segmentation
-st.subheader("👥 Customer Segmentation: Behavioral Clustering")
+st.subheader("◆ Customer Segmentation: Behavioral Clustering")
 st.markdown("**Model Target:** Groups customers into behavioral clusters based on spending patterns and purchase behavior to enable personalized marketing strategies.")
 
 seg_file = os.path.join(ML_RESULTS_DIR, 'customer_segments.csv')
@@ -737,8 +681,7 @@ if os.path.exists(seg_file):
                 x='Segment',
                 y='Customer Count',
                 title='Customer Count by Segment',
-                color='Customer Count',
-                color_continuous_scale='Teal'
+                color_discrete_sequence=['#14B8A6']
             )
             fig_seg = style_chart(fig_seg)
             st.plotly_chart(fig_seg, use_container_width=True)
@@ -753,7 +696,7 @@ if os.path.exists(seg_file):
                 values='Total Revenue',
                 names='Segment',
                 title='Revenue Contribution by Segment',
-                color_discrete_sequence=px.colors.sequential.RdBu,
+                color_discrete_sequence=['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
                 hole=0.4
             )
             fig_revenue = style_chart(fig_revenue)
@@ -790,7 +733,7 @@ if os.path.exists(seg_file):
             st.plotly_chart(fig_orders, use_container_width=True)
         
         # Detailed metrics
-        with st.expander("📊 Detailed Segment Metrics"):
+        with st.expander("▸ Detailed Segment Metrics"):
             metrics = seg_data.groupby('Segment').agg({
                 'CustomerID': 'count',
                 'TotalSpending': ['sum', 'mean'],
@@ -818,7 +761,7 @@ else:
 st.markdown("---")
 
 # Market Basket Analysis
-st.subheader("🛒 Market Basket Analysis: Product Associations")
+st.subheader("◆ Market Basket Analysis: Product Associations")
 st.markdown("**Model Target:** Identifies products frequently purchased together to enable cross-selling, product bundling, and optimized store layout strategies.")
 
 basket_file = os.path.join(ML_RESULTS_DIR, 'product_associations.csv')
@@ -846,8 +789,7 @@ if os.path.exists(basket_file):
             y='Pair',
             orientation='h',
             title='Top Product Pairs by Co-occurrence Frequency',
-            color='Support',
-            color_continuous_scale='Viridis',
+            color_discrete_sequence=['#8B5CF6'],
             hover_data=['Support']
         )
         fig_basket.update_layout(height=600)
@@ -855,7 +797,7 @@ if os.path.exists(basket_file):
         st.plotly_chart(fig_basket, use_container_width=True)
         
         # Detailed table
-        with st.expander("📋 View Complete Association Rules"):
+        with st.expander("▸ View Complete Association Rules"):
             display_basket = basket_data.copy()
             display_basket['Support'] = display_basket['Support'].round(3)
             st.dataframe(display_basket, use_container_width=True, hide_index=True)
@@ -886,7 +828,7 @@ else:
 st.markdown("---")
 
 # Sales Forecasting
-st.subheader("📈 Sales Forecasting: Predictive Revenue Analysis")
+st.subheader("◆ Sales Forecasting: Predictive Revenue Analysis")
 st.markdown("**Model Target:** Predicts future 3-month revenue trends using time series analysis to support inventory planning, staffing decisions, and financial projections.")
 
 forecast_file = os.path.join(ML_RESULTS_DIR, 'sales_forecast.csv')
@@ -995,7 +937,7 @@ else:
 st.markdown("---")
 
 # Churn Prediction Analysis
-st.subheader("⚠️ Churn Prediction: Customer Retention Analysis")
+st.subheader("◆ Churn Prediction: Customer Retention Analysis")
 st.markdown("**Model Target:** Predicts which customers are likely to stop purchasing using XGBoost machine learning, enabling proactive retention campaigns and reducing customer churn.")
 
 churn_file = os.path.join(ML_RESULTS_DIR, 'churn_prediction.csv')
@@ -1048,8 +990,7 @@ if os.path.exists(churn_file):
             y=recency_churn.values,
             title='Average Churn Risk by Recency (Days Since Last Purchase)',
             labels={'x': 'Recency Period', 'y': 'Avg Churn Risk (%)'},
-            color=recency_churn.values,
-            color_continuous_scale='Reds'
+            color_discrete_sequence=['#EF4444']
         )
         st.plotly_chart(fig_recency, use_container_width=True)
         
@@ -1072,7 +1013,7 @@ else:
 st.markdown("---")
 
 # Product Recommendation Analysis
-st.subheader("🎁 Product Recommendation: Personalized Suggestions")
+st.subheader("◆ Product Recommendation: Personalized Suggestions")
 st.markdown("**Model Target:** Recommends products to customers using collaborative filtering based on similar customer behavior and purchase patterns to increase cross-selling and average order value.")
 
 rec_file = os.path.join(ML_RESULTS_DIR, 'product_recommendations.csv')
@@ -1100,8 +1041,7 @@ if os.path.exists(rec_file):
             orientation='h',
             title='Top 10 Most Recommended Products',
             labels={'count': 'Recommendation Count', 'ProductDescription': 'Product'},
-            color='count',
-            color_continuous_scale='Blues'
+            color_discrete_sequence=['#3B82F6']
         )
         fig_top_products.update_layout(height=400)
         st.plotly_chart(fig_top_products, use_container_width=True)
@@ -1127,8 +1067,7 @@ if os.path.exists(rec_file):
             y=rank_dist.values,
             title='Recommendation Distribution by Rank (1=Best Match)',
             labels={'x': 'Recommendation Rank', 'y': 'Count'},
-            color=rank_dist.values,
-            color_continuous_scale='Greens'
+            color_discrete_sequence=['#10B981']
         )
         st.plotly_chart(fig_rank, use_container_width=True)
         
@@ -1152,7 +1091,7 @@ else:
 st.markdown("---")
 
 # Action Items
-st.header("🎯 Recommended Actions")
+st.header("▸ Recommended Actions")
 
 col1, col2 = st.columns(2)
 
