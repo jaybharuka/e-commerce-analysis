@@ -1,0 +1,151 @@
+# DevOps Architecture Diagram
+# Use this file as a guide to create your architecture diagram in PowerPoint, Draw.io, or Lucidchart
+
+## Architecture Flow (Top to Bottom)
+
+┌─────────────────────────────────────────────────────────────────┐
+│                         DEVELOPER                               │
+│                                                                 │
+│  • Writes Code                                                  │
+│  • Commits Changes (git commit)                                 │
+│  • Pushes to GitHub (git push)                                  │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    GITHUB REPOSITORY                            │
+│                https://github.com/jaybharuka/                   │
+│                  e-commerce-analysis.git                        │
+│                                                                 │
+│  • Source Code Storage                                          │
+│  • Version Control                                              │
+│  • Jenkinsfile                                                  │
+│  • Dockerfile                                                   │
+│  • Terraform Files                                              │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+                         │ Pipeline Trigger
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    JENKINS CI/CD PIPELINE                       │
+│                   Running on Docker Container                   │
+│                        Port: 8080                               │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  STAGE 1: CHECKOUT                                      │   │
+│  │  • Clone from GitHub                                    │   │
+│  │  • Pull latest code                                     │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                         │                                       │
+│                         ▼                                       │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  STAGE 2: BUILD DOCKER IMAGE                            │   │
+│  │  • Read Dockerfile                                      │   │
+│  │  • Build image: ecommerce-analytics                     │   │
+│  │  • Tag image                                            │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                         │                                       │
+│                         ▼                                       │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  STAGE 3: DEPLOY CONTAINER                              │   │
+│  │  • Stop old container                                   │   │
+│  │  • Remove old container                                 │   │
+│  │  • Run new container on port 8501                       │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+                         │ Docker Run
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      DOCKER ENGINE                              │
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │         STREAMLIT APPLICATION CONTAINER                  │  │
+│  │                                                          │  │
+│  │  • Base: Python 3.9 Slim                                │  │
+│  │  • App: E-commerce Analytics Dashboard                  │  │
+│  │  • Port: 8501                                           │  │
+│  │  • Status: Running                                      │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                 │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+                         │ Access
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                         END USERS                               │
+│                                                                 │
+│  • Access via: http://localhost:8501                            │
+│  • View Analytics Dashboard                                    │
+│  • Interact with Data                                           │
+└─────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│                  FUTURE: TERRAFORM + AWS CLOUD                  │
+│                       (Infrastructure Layer)                    │
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │              TERRAFORM (Infrastructure as Code)          │  │
+│  │                                                          │  │
+│  │  • Defines AWS Resources                                │  │
+│  │  • Security Groups                                      │  │
+│  │  • EC2 Instance Configuration                           │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                         │                                       │
+│                         │ terraform apply                       │
+│                         ▼                                       │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │                      AWS CLOUD                           │  │
+│  │                   Region: ap-south-1                     │  │
+│  │                                                          │  │
+│  │  ┌────────────────────────────────────────────────────┐ │  │
+│  │  │  EC2 Instance (t2.micro)                           │ │  │
+│  │  │  • Ubuntu 24.04 LTS                                │ │  │
+│  │  │  • Docker Installed                                │ │  │
+│  │  │  • Application Container Running                   │ │  │
+│  │  └────────────────────────────────────────────────────┘ │  │
+│  │                                                          │  │
+│  │  ┌────────────────────────────────────────────────────┐ │  │
+│  │  │  Security Group                                    │ │  │
+│  │  │  • Port 22 (SSH)                                   │ │  │
+│  │  │  • Port 8501 (Streamlit)                           │ │  │
+│  │  │  • Outbound: All Traffic                           │ │  │
+│  │  └────────────────────────────────────────────────────┘ │  │
+│  │                                                          │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+
+## TOOLS LAYER (Show as icons/boxes at bottom)
+
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│     Git      │ │   GitHub     │ │   Jenkins    │ │    Docker    │
+│   (Version   │ │  (Repository │ │   (CI/CD)    │ │ (Container)  │
+│   Control)   │ │   Hosting)   │ │              │ │              │
+└──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘
+
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│  Terraform   │ │     AWS      │ │  Streamlit   │ │   Python     │
+│    (IaC)     │ │   (Cloud)    │ │   (App)      │ │   3.9        │
+│              │ │              │ │              │ │              │
+└──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘
+
+
+## COLOR CODING SUGGESTIONS FOR DIAGRAM:
+
+Developer Layer:        Blue (#4A90E2)
+GitHub:                 Black (#333333)
+Jenkins:                Red (#D33833)
+Docker:                 Blue (#0DB7ED)
+AWS:                    Orange (#FF9900)
+Terraform:              Purple (#7B42BC)
+Application:            Green (#4CAF50)
+
+## ARROWS MEANING:
+
+Solid Arrow (─────▶)    : Automated Process
+Dashed Arrow (- - - ▶)  : Manual Trigger
+Double Arrow (═════▶)   : Data Flow
