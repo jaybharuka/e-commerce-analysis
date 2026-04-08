@@ -1,0 +1,28 @@
+# ============================================================
+# terraform.tfvars.example
+# Copy this file to terraform.tfvars and fill in your values.
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# IMPORTANT: terraform.tfvars is in .gitignore.
+#            Never commit real credentials or key names to Git.
+# ============================================================
+
+# ── Required ──────────────────────────────────────────────────────────────────
+# Your DockerHub image pushed by Jenkins. Format: username/repo:tag
+# The Jenkinsfile sets this automatically via -var="dockerhub_image=..."
+# For manual runs, set it explicitly:
+dockerhub_image = "jaybharuka/ecommerce-analytics:latest"
+
+# ── SSH Key Pair (Recommended) ────────────────────────────────────────────────
+# Create a key pair in AWS Console > EC2 > Key Pairs > Create key pair
+# Download the .pem file and store it at ~/.ssh/<key_name>.pem
+# Then set chmod 400 ~/.ssh/<key_name>.pem
+key_name = "ecommerce-key"   # Replace with your actual key pair name
+
+# ── Optional Overrides (defaults shown) ──────────────────────────────────────
+aws_region    = "ap-south-1"          # AWS Mumbai region
+instance_type = "t2.micro"            # Free tier eligible
+project_name  = "ecommerce-analytics"
+environment   = "production"
+app_port      = 8501
+ssh_port      = 22

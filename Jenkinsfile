@@ -1,57 +1,267 @@
+// ============================================================
+// Jenkinsfile — E-Commerce Analytics CI/CD Pipeline
+// ============================================================
+// Flow:
+//   1. Checkout source from GitHub
+//   2. Build Docker image (tagged with build number)
+//   3. Push image to DockerHub
+//   4. Terraform Init  → download providers, initialise backend
+//   5. Terraform Validate → syntax / config check
+//   6. Terraform Plan  → show what will change
+//   7. Terraform Apply → provision EC2, start container
+//   8. Post-build      → print app URL, cleanup workspace
+//
+// Jenkins Credentials required (configure at
+//   Manage Jenkins → Credentials → System → Global):
+//
+//   ID                  Kind                    Usage
+//   ─────────────────── ─────────────────────── ─────────────────────────────
+//   dockerhub-creds     Username with password  DockerHub login
+//   aws-credentials     Username with password  AWS_ACCESS_KEY_ID (username)
+//                                               AWS_SECRET_ACCESS_KEY (password)
+// ============================================================
+
 pipeline {
     agent any
 
+    // ── Global environment variables ──────────────────────────────────────
     environment {
-        DOCKER_IMAGE = 'ecommerce-analytics'
-        DOCKER_PORT = '8501'
+        // DockerHub repository — change <username> to your DockerHub handle
+        DOCKERHUB_REPO  = 'jaybharuka18/ecommerce-analytics'
+
+        // Image tag uses the Jenkins build number for full traceability
+        IMAGE_TAG       = "${BUILD_NUMBER}"
+
+        // Fully-qualified image reference used throughout the pipeline
+        FULL_IMAGE      = "${DOCKERHUB_REPO}:${IMAGE_TAG}"
+
+        // Port the Streamlit app listens on
+        APP_PORT        = '8501'
+
+        // Relative path to the Terraform directory inside the repository
+        TF_DIR          = 'terraform'
+
+        // Terraform auto-approve flag (set to '' to require manual confirmation)
+        TF_AUTO_APPROVE = '-auto-approve'
     }
 
     stages {
+
+        // ── 1. Checkout ───────────────────────────────────────────────────
         stage('Checkout') {
             steps {
-                // Replace with your actual GitHub repository URL
-                git branch: 'main', url: 'https://github.com/jaybharuka/e-commerce-analysis.git'
+                echo "==> Checking out source code from GitHub..."
+                git branch: 'main',
+                    url: 'https://github.com/jaybharuka/e-commerce-analysis.git'
+                echo "==> Workspace contents:"
+                sh 'ls -la'
             }
         }
 
+        // ── 2. Build Docker Image ─────────────────────────────────────────
         stage('Build Docker Image') {
             steps {
                 script {
-                    echo "Building Docker image..."
+                    echo "==> Building Docker image: ${FULL_IMAGE}"
                     sh """
-                        pwd
-                        ls -la
-                        ls -la streamlit/
-                        docker build -t ${DOCKER_IMAGE} -f streamlit/dockerfile .
+                        docker build \
+                            -t ${FULL_IMAGE} \
+                            -t ${DOCKERHUB_REPO}:latest \
+                            -f streamlit/dockerfile \
+                            .
                     """
+                    echo "==> Build complete. Image: ${FULL_IMAGE}"
                 }
             }
         }
 
-        stage('Run Container') {
+        // ── 3. Push to DockerHub ──────────────────────────────────────────
+        stage('Push to DockerHub') {
             steps {
                 script {
-                    echo "Running Docker container..."
-                    // Stop and remove existing container if it exists
-                    sh """
-                        docker stop ${DOCKER_IMAGE} 2>/dev/null || true
-                        docker rm ${DOCKER_IMAGE} 2>/dev/null || true
-                        docker run -d -p ${DOCKER_PORT}:${DOCKER_PORT} --name ${DOCKER_IMAGE} ${DOCKER_IMAGE}
-                    """
+                    echo "==> Pushing image to DockerHub..."
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'dockerhub-creds',
+                            usernameVariable: 'DOCKER_USER',
+                            passwordVariable: 'DOCKER_PASS'
+                        )
+                    ]) {
+                        sh """
+                            echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
+
+                            # Push versioned tag (immutable, traceable to this build)
+                            docker push ${FULL_IMAGE}
+
+                            # Push 'latest' tag so EC2 user_data can use a fixed reference
+                            docker push ${DOCKERHUB_REPO}:latest
+
+                            docker logout
+                        """
+                    }
+                    echo "==> Image pushed: ${FULL_IMAGE}"
+                }
+            }
+        }
+
+        // ── 4. Terraform Init ─────────────────────────────────────────────
+        stage('Terraform Init') {
+            steps {
+                script {
+                    echo "==> Initialising Terraform in ./${TF_DIR}/ ..."
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'aws-credentials',
+                            usernameVariable: 'AWS_ACCESS_KEY_ID',
+                            passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                        )
+                    ]) {
+                        sh """
+                            cd ${TF_DIR}
+                            terraform init -input=false
+                        """
+                    }
+                }
+            }
+        }
+
+        // ── 5. Terraform Validate ─────────────────────────────────────────
+        stage('Terraform Validate') {
+            steps {
+                script {
+                    echo "==> Validating Terraform configuration..."
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'aws-credentials',
+                            usernameVariable: 'AWS_ACCESS_KEY_ID',
+                            passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                        )
+                    ]) {
+                        sh """
+                            cd ${TF_DIR}
+                            terraform validate
+                        """
+                    }
+                    echo "==> Terraform configuration is valid."
+                }
+            }
+        }
+
+        // ── 6. Terraform Plan ─────────────────────────────────────────────
+        stage('Terraform Plan') {
+            steps {
+                script {
+                    echo "==> Generating Terraform execution plan..."
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'aws-credentials',
+                            usernameVariable: 'AWS_ACCESS_KEY_ID',
+                            passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                        )
+                    ]) {
+                        sh """
+                            cd ${TF_DIR}
+                            terraform plan \
+                                -input=false \
+                                -var="dockerhub_image=${FULL_IMAGE}" \
+                                -out=tfplan
+                        """
+                    }
+                    echo "==> Plan saved to ./${TF_DIR}/tfplan"
+                }
+            }
+        }
+
+        // ── 7. Terraform Apply ────────────────────────────────────────────
+        stage('Terraform Apply') {
+            steps {
+                script {
+                    echo "==> Applying Terraform plan — provisioning AWS infrastructure..."
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'aws-credentials',
+                            usernameVariable: 'AWS_ACCESS_KEY_ID',
+                            passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                        )
+                    ]) {
+                        sh """
+                            cd ${TF_DIR}
+                            terraform apply ${TF_AUTO_APPROVE} tfplan
+                        """
+                    }
+                    echo "==> Infrastructure provisioned successfully."
+                }
+            }
+        }
+
+        // ── 8. Output App URL ─────────────────────────────────────────────
+        stage('Deployment Info') {
+            steps {
+                script {
+                    echo "==> Fetching deployment outputs from Terraform..."
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'aws-credentials',
+                            usernameVariable: 'AWS_ACCESS_KEY_ID',
+                            passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                        )
+                    ]) {
+                        // Capture the public IP output from Terraform state
+                        def appUrl = sh(
+                            script: "cd ${TF_DIR} && terraform output -raw app_url",
+                            returnStdout: true
+                        ).trim()
+
+                        def publicIp = sh(
+                            script: "cd ${TF_DIR} && terraform output -raw public_ip",
+                            returnStdout: true
+                        ).trim()
+
+                        echo "=============================================="
+                        echo " DEPLOYMENT SUCCESSFUL"
+                        echo " Build       : #${BUILD_NUMBER}"
+                        echo " Docker Image: ${FULL_IMAGE}"
+                        echo " Instance IP : ${publicIp}"
+                        echo " App URL     : ${appUrl}"
+                        echo " NOTE: Allow ~60 seconds for EC2 user_data"
+                        echo "       bootstrap to complete before accessing."
+                        echo "=============================================="
+                    }
                 }
             }
         }
     }
 
+    // ── Post-build actions ────────────────────────────────────────────────
     post {
         always {
-            echo "Pipeline execution completed."
+            echo "==> Pipeline finished. Build #${BUILD_NUMBER}."
+            // Remove dangling Docker images to keep the Jenkins host clean
+            sh 'docker image prune -f || true'
         }
         success {
-            echo "Deployment successful! App is running on port ${DOCKER_PORT}."
+            echo "==> SUCCESS — E-Commerce app deployed and running."
         }
         failure {
-            echo "Deployment failed. Check the logs."
+            echo "==> FAILURE — Review the stage logs above for details."
+            // Attempt a Terraform destroy on failure to avoid orphaned resources
+            script {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'aws-credentials',
+                        usernameVariable: 'AWS_ACCESS_KEY_ID',
+                        passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                    )
+                ]) {
+                    sh """
+                        cd ${TF_DIR}
+                        terraform destroy -auto-approve \
+                            -var="dockerhub_image=${FULL_IMAGE}" \
+                            || true
+                    """
+                }
+            }
         }
     }
 }
+
