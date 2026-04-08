@@ -32,8 +32,11 @@ data "aws_ami" "ubuntu" {
 
 # ------------------------------------------------------------
 # Security Group
-# Allows inbound SSH (22) for management and the Streamlit
-# application port (8501) from anywhere.
+# Allows inbound:
+#   22   — SSH management
+#   8501 — Streamlit application
+#   9090 — Prometheus metrics UI
+#   3000 — Grafana dashboard
 # All outbound traffic is permitted so the instance can reach
 # DockerHub and the apt package mirrors on boot.
 # ------------------------------------------------------------
@@ -53,6 +56,22 @@ resource "aws_security_group" "app_sg" {
     description = "Streamlit application port"
     from_port   = var.app_port
     to_port     = var.app_port
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Prometheus metrics UI"
+    from_port   = 9090
+    to_port     = 9090
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Grafana dashboard"
+    from_port   = 3000
+    to_port     = 3000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

@@ -3,13 +3,14 @@
 // ============================================================
 // Flow:
 //   1. Checkout source from GitHub
-//   2. Build Docker image (tagged with build number)
-//   3. Push image to DockerHub
-//   4. Terraform Init  → download providers, initialise backend
-//   5. Terraform Validate → syntax / config check
-//   6. Terraform Plan  → show what will change
-//   7. Terraform Apply → provision EC2, start container
-//   8. Post-build      → print app URL, cleanup workspace
+//   2. SonarQube Analysis → code quality scan (bugs, smells, coverage)
+//   3. Build Docker image (tagged with build number)
+//   4. Push image to DockerHub
+//   5. Terraform Init  → download providers, initialise backend
+//   6. Terraform Validate → syntax / config check
+//   7. Terraform Plan  → show what will change
+//   8. Terraform Apply → provision EC2, start container
+//   9. Post-build      → print app URL, cleanup workspace
 //
 // Jenkins Credentials required (configure at
 //   Manage Jenkins → Credentials → System → Global):
@@ -19,6 +20,7 @@
 //   dockerhub-creds     Username with password  DockerHub login
 //   aws-credentials     Username with password  AWS_ACCESS_KEY_ID (username)
 //                                               AWS_SECRET_ACCESS_KEY (password)
+//   sonarqube-token     Secret text             SonarQube user token
 // ============================================================
 
 pipeline {
@@ -37,6 +39,9 @@ pipeline {
 
         // Port the Streamlit app listens on
         APP_PORT        = '8501'
+
+        // SonarQube server URL (running locally via docker-compose on port 9001)
+        SONAR_HOST_URL  = 'http://localhost:9001'
 
         // Relative path to the Terraform directory inside the repository
         TF_DIR          = 'terraform'
@@ -58,7 +63,32 @@ pipeline {
             }
         }
 
-        // ── 2. Build Docker Image ─────────────────────────────────────────
+        // ── 2. SonarQube Analysis ─────────────────────────────────────────
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    echo "==> Running SonarQube code analysis..."
+                    withCredentials([
+                        string(
+                            credentialsId: 'sonarqube-token',
+                            variable: 'SONAR_TOKEN'
+                        )
+                    ]) {
+                        sh """
+                            docker run --rm \\
+                                --network host \\
+                                -e SONAR_HOST_URL=${SONAR_HOST_URL} \\
+                                -e SONAR_TOKEN=${SONAR_TOKEN} \\
+                                -v \$(pwd):/usr/src \\
+                                sonarsource/sonar-scanner-cli:latest
+                        """
+                    }
+                    echo "==> SonarQube analysis complete. View results at ${SONAR_HOST_URL}"
+                }
+            }
+        }
+
+        // ── 3. Build Docker Image ─────────────────────────────────────────
         stage('Build Docker Image') {
             steps {
                 script {
