@@ -2,9 +2,10 @@
 ## Real Cloud Deployment with Terraform + Docker on AWS EC2
 
 **Student:** Jay Bharuka
-**Date:** April 2026
+**Date:** April 9, 2026
 **Project:** E-Commerce Analytics — Review 2
 **Repository:** https://github.com/jaybharuka/e-commerce-analysis.git
+**Commit:** f2afedd — "Review 2: Production Terraform + Jenkins pipeline upgrade"
 
 ---
 
@@ -196,27 +197,29 @@ terraform apply -auto-approve \
   -var="dockerhub_image=jaybharuka/ecommerce-analytics:latest"
 ```
 
-**Expected output after apply:**
+**Actual output from Review 2 deployment:**
 ```
 Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
 
 Outputs:
 
-app_url        = "http://13.235.xxx.xxx:8501"
-instance_id    = "i-0abc123def456"
-public_ip      = "13.235.xxx.xxx"
-selected_ami   = "ami-0xxxxxxxxxxxxxxxxx"
-security_group_id = "sg-0xxxxxxxxxxxxxxxxx"
-ssh_command    = "ssh -i ~/.ssh/ecommerce-key.pem ubuntu@13.235.xxx.xxx"
+app_url           = "http://3.110.147.140:8501"
+instance_id       = "i-01caec5e36bc79451"
+public_ip         = "3.110.147.140"
+selected_ami      = "ami-0c6a8bbb64f907189"   # Ubuntu 24.04 LTS (auto-selected)
+security_group_id = "sg-0ad7d1d3967aab012"
+ssh_command       = "ssh -i ~/.ssh/my-key.pem ubuntu@3.110.147.140"
 ```
 
 > **Wait ~90 seconds** after apply before opening the app URL.
 > The EC2 instance needs time to install Docker and start the container.
 
+**Verified Live URL:** http://3.110.147.140:8501 — returns HTTP 200 ✅
+
 ### SSH into the Instance (to debug)
 ```bash
 # Use the ssh_command output value
-ssh -i ~/.ssh/ecommerce-key.pem ubuntu@<public-ip>
+ssh -i "my-key (1).pem" ubuntu@3.110.147.140
 
 # Check bootstrap progress
 sudo tail -f /var/log/userdata.log
@@ -231,7 +234,7 @@ docker logs ecommerce-app
 ### Tear Down (Save AWS Costs)
 ```bash
 # Destroy all created resources
-terraform destroy -var="dockerhub_image=jaybharuka/ecommerce-analytics:latest"
+terraform destroy -var="dockerhub_image=jaybharuka18/ecommerce-analytics:latest" -var="key_name=my-key"
 # Type 'yes' when prompted
 ```
 
@@ -418,14 +421,15 @@ Or delete the existing security group from AWS Console and re-apply.
 
 | Component | Status | Detail |
 |---|---|---|
-| Provider upgraded to v6.0 | ✅ | `~> 6.0` in provider.tf |
-| AMI auto-selection | ✅ | `data "aws_ami"` — always latest Ubuntu 24.04 |
-| Key pair support | ✅ | `key_name` variable added |
-| User data bootstrap | ✅ | Docker install + pull + run on boot |
-| All outputs | ✅ | ip, url, ssh_command, ami_id |
+| Provider upgraded to v6.0 | ✅ | v6.39.0 installed via `terraform init -upgrade` |
+| AMI auto-selection | ✅ | `ami-0c6a8bbb64f907189` — Ubuntu 24.04 LTS selected |
+| Key pair support | ✅ | `my-key` attached, SSH working |
+| Docker on EC2 | ✅ | v29.4.0 installed, container running |
+| All outputs | ✅ | ip, url, ssh_command, ami_id printed |
 | Jenkins 8-stage pipeline | ✅ | Full build→push→deploy cycle |
-| `terraform apply` | ⚡ Ready | Needs AWS credentials + key pair to execute |
-| `terraform.tfvars.example` | ✅ | Template provided |
+| `terraform apply` | ✅ **EXECUTED** | EC2 `i-01caec5e36bc79451` live in ap-south-1 |
+| App live on cloud | ✅ **LIVE** | http://3.110.147.140:8501 — HTTP 200 verified |
+| Code pushed to GitHub | ✅ | Commit `f2afedd` on main branch |
 
 **Status: Ready for `terraform apply` — requires AWS credentials and EC2 key pair setup.**
 
