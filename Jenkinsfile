@@ -66,24 +66,26 @@ pipeline {
         // ── 2. SonarQube Analysis ─────────────────────────────────────────
         stage('SonarQube Analysis') {
             steps {
-                script {
-                    echo "==> Running SonarQube code analysis..."
-                    withCredentials([
-                        string(
-                            credentialsId: 'sonarqube-token',
-                            variable: 'SONAR_TOKEN'
-                        )
-                    ]) {
-                        sh """
-                            docker run --rm \\
-                                --network host \\
-                                -e SONAR_HOST_URL=${SONAR_HOST_URL} \\
-                                -e SONAR_TOKEN=${SONAR_TOKEN} \\
-                                -v \$(pwd):/usr/src \\
-                                sonarsource/sonar-scanner-cli:latest
-                        """
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                    script {
+                        echo "==> Running SonarQube code analysis..."
+                        withCredentials([
+                            string(
+                                credentialsId: 'sonarqube-token',
+                                variable: 'SONAR_TOKEN'
+                            )
+                        ]) {
+                            sh """
+                                docker run --rm \\
+                                    --network host \\
+                                    -e SONAR_HOST_URL=${SONAR_HOST_URL} \\
+                                    -e SONAR_TOKEN=${SONAR_TOKEN} \\
+                                    -v \$(pwd):/usr/src \\
+                                    sonarsource/sonar-scanner-cli:latest
+                            """
+                        }
+                        echo "==> SonarQube analysis complete. View results at ${SONAR_HOST_URL}"
                     }
-                    echo "==> SonarQube analysis complete. View results at ${SONAR_HOST_URL}"
                 }
             }
         }
