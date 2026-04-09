@@ -125,16 +125,55 @@ resource "aws_instance" "app" {
     systemctl start docker
     echo "[$(date)] Docker installed and started."
 
-    # ── Pull and run the application container ─────────────────
+    # ── Streamlit Application ───────────────────────────────────
     docker pull ${var.dockerhub_image}
-
     docker run -d \
+        --net=host \
         --name ecommerce-app \
         --restart always \
-        -p ${var.app_port}:${var.app_port} \
         ${var.dockerhub_image}
+    echo "[$(date)] Streamlit app started on port ${var.app_port}."
 
-    echo "[$(date)] Bootstrap complete. App running on port ${var.app_port}."
+    # ── Node Exporter ───────────────────────────────────────────
+    docker run -d \
+        --net=host \
+        --name node-exporter \
+        --restart always \
+        prom/node-exporter:latest
+    echo "[$(date)] Node Exporter started on port 9100."
+
+    # ── Prometheus config ───────────────────────────────────────
+    mkdir -p /etc/prometheus
+    printf '%s\n' \
+        'global:' \
+        '  scrape_interval: 15s' \
+        'scrape_configs:' \
+        '  - job_name: node-exporter' \
+        '    static_configs:' \
+        "      - targets: ['localhost:9100']" \
+        > /etc/prometheus/prometheus.yml
+
+    # ── Prometheus ──────────────────────────────────────────────
+    docker run -d \
+        --net=host \
+        --name prometheus \
+        --restart always \
+        -v /etc/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml \
+        prom/prometheus:latest \
+        --config.file=/etc/prometheus/prometheus.yml \
+        --web.listen-address=:9090
+    echo "[$(date)] Prometheus started on port 9090."
+
+    # ── Grafana ─────────────────────────────────────────────────
+    docker run -d \
+        --net=host \
+        --name grafana \
+        --restart always \
+        -e GF_SECURITY_ADMIN_PASSWORD=admin123 \
+        grafana/grafana:latest
+    echo "[$(date)] Grafana started on port 3000."
+
+    echo "[$(date)] Bootstrap complete. All services running."
   EOF
 
   tags = {
