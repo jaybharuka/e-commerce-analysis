@@ -85,9 +85,7 @@ pipeline {
                                     -Dsonar.projectKey=ecommerce-analytics \\
                                     -Dsonar.projectName="E-Commerce Analytics" \\
                                     -Dsonar.sources=. \\
-                                    -Dsonar.language=py \\
-                                    -Dsonar.python.version=3.9 \\
-                                    -Dsonar.exclusions=**/__pycache__/**,**/*.pyc,**/node_modules/**,ml_results/**,terraform/**,configs/**,dags/**
+                                    -Dsonar.exclusions=**/__pycache__/**,**/*.pyc,**/node_modules/**,ml_results/**,terraform/**,configs/**,dags/**,**/*.md,**/*.txt,**/*.pdf
                             """
                         }
                         echo "==> SonarQube analysis complete. View results at ${SONAR_HOST_URL}"
