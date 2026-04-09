@@ -200,7 +200,6 @@ pipeline {
                             terraform plan \
                                 -input=false \
                                 -var="dockerhub_image=${FULL_IMAGE}" \
-                                -replace=aws_instance.app \
                                 -out=tfplan
                         """
                     }
