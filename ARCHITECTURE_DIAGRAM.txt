@@ -1,151 +1,231 @@
-# DevOps Architecture Diagram
-# Use this file as a guide to create your architecture diagram in PowerPoint, Draw.io, or Lucidchart
+# DevOps Architecture Diagram — Review 2
+# E-Commerce Analytics — Full CI/CD + Monitoring + Code Quality
+# Use this file as a guide to create your diagram in Draw.io, Lucidchart, or PowerPoint
 
-## Architecture Flow (Top to Bottom)
+================================================================================
+                    REVIEW 2 — FULL SYSTEM ARCHITECTURE
+================================================================================
 
-┌─────────────────────────────────────────────────────────────────┐
-│                         DEVELOPER                               │
-│                                                                 │
-│  • Writes Code                                                  │
-│  • Commits Changes (git commit)                                 │
-│  • Pushes to GitHub (git push)                                  │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    GITHUB REPOSITORY                            │
-│                https://github.com/jaybharuka/                   │
-│                  e-commerce-analysis.git                        │
-│                                                                 │
-│  • Source Code Storage                                          │
-│  • Version Control                                              │
-│  • Jenkinsfile                                                  │
-│  • Dockerfile                                                   │
-│  • Terraform Files                                              │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         │ Pipeline Trigger
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    JENKINS CI/CD PIPELINE                       │
-│                   Running on Docker Container                   │
-│                        Port: 8080                               │
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │  STAGE 1: CHECKOUT                                      │   │
-│  │  • Clone from GitHub                                    │   │
-│  │  • Pull latest code                                     │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                         │                                       │
-│                         ▼                                       │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │  STAGE 2: BUILD DOCKER IMAGE                            │   │
-│  │  • Read Dockerfile                                      │   │
-│  │  • Build image: ecommerce-analytics                     │   │
-│  │  • Tag image                                            │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                         │                                       │
-│                         ▼                                       │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │  STAGE 3: DEPLOY CONTAINER                              │   │
-│  │  • Stop old container                                   │   │
-│  │  • Remove old container                                 │   │
-│  │  • Run new container on port 8501                       │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                                                                 │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         │ Docker Run
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      DOCKER ENGINE                              │
-│                                                                 │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │         STREAMLIT APPLICATION CONTAINER                  │  │
-│  │                                                          │  │
-│  │  • Base: Python 3.9 Slim                                │  │
-│  │  • App: E-commerce Analytics Dashboard                  │  │
-│  │  • Port: 8501                                           │  │
-│  │  • Status: Running                                      │  │
-│  └──────────────────────────────────────────────────────────┘  │
-│                                                                 │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         │ Access
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                         END USERS                               │
-│                                                                 │
-│  • Access via: http://localhost:8501                            │
-│  • View Analytics Dashboard                                    │
-│  • Interact with Data                                           │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       LOCAL DEVELOPMENT MACHINE                             │
+│                                                                             │
+│   ┌───────────────┐    git push     ┌──────────────────────────────────┐   │
+│   │   DEVELOPER   │ ─────────────▶  │       GITHUB REPOSITORY          │   │
+│   │               │                 │  github.com/jaybharuka/          │   │
+│   │  Writes Code  │                 │  e-commerce-analysis.git         │   │
+│   │  git commit   │                 │                                  │   │
+│   │  git push     │                 │  • Jenkinsfile (9-stage)         │   │
+│   └───────────────┘                 │  • Dockerfile                    │   │
+│                                     │  • terraform/ (IaC)              │   │
+│                                     │  • sonar-project.properties      │   │
+│                                     │  • docker-compose.yaml           │   │
+│                                     └──────────────┬───────────────────┘   │
+│                                                     │ Pipeline              │
+│                                                     │ Trigger               │
+│                                                     ▼                       │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │              JENKINS CI/CD PIPELINE  (Docker, Port 8080)           │   │
+│   │                                                                     │   │
+│   │  ┌────────────────────────────────────────────────────────────┐    │   │
+│   │  │ STAGE 1: Checkout                                          │    │   │
+│   │  │  Clone latest code from GitHub main branch                 │    │   │
+│   │  └────────────────────┬───────────────────────────────────────┘    │   │
+│   │                       │                                             │   │
+│   │  ┌────────────────────▼───────────────────────────────────────┐    │   │
+│   │  │ STAGE 2: SonarQube Analysis  [UNSTABLE if token missing]   │    │   │
+│   │  │  docker run sonarsource/sonar-scanner-cli                  │    │   │
+│   │  │  Scans for bugs, code smells, vulnerabilities              │    │   │
+│   │  └────────────────────┬───────────────────────────────────────┘    │   │
+│   │                       │                                             │   │
+│   │  ┌────────────────────▼───────────────────────────────────────┐    │   │
+│   │  │ STAGE 3: Build Docker Image                                │    │   │
+│   │  │  docker build -t jaybharuka18/ecommerce-analytics:<N>      │    │   │
+│   │  │  Also tags as :latest                                      │    │   │
+│   │  └────────────────────┬───────────────────────────────────────┘    │   │
+│   │                       │                                             │   │
+│   │  ┌────────────────────▼───────────────────────────────────────┐    │   │
+│   │  │ STAGE 4: Push to DockerHub                                 │    │   │
+│   │  │  docker push jaybharuka18/ecommerce-analytics:<N>          │    │   │
+│   │  │  docker push jaybharuka18/ecommerce-analytics:latest       │    │   │
+│   │  └────────────────────┬───────────────────────────────────────┘    │   │
+│   │                       │                                             │   │
+│   │  ┌────────────────────▼───────────────────────────────────────┐    │   │
+│   │  │ STAGE 5: Terraform Init                                    │    │   │
+│   │  │  Download AWS provider v6.39.0                             │    │   │
+│   │  │  State backend: /var/jenkins_home/terraform-state/         │    │   │
+│   │  └────────────────────┬───────────────────────────────────────┘    │   │
+│   │                       │                                             │   │
+│   │  ┌────────────────────▼───────────────────────────────────────┐    │   │
+│   │  │ STAGE 6: Terraform Validate                                │    │   │
+│   │  │  Syntax and configuration check                            │    │   │
+│   │  └────────────────────┬───────────────────────────────────────┘    │   │
+│   │                       │                                             │   │
+│   │  ┌────────────────────▼───────────────────────────────────────┐    │   │
+│   │  │ STAGE 7: Terraform Plan                                    │    │   │
+│   │  │  Preview infrastructure changes, save to tfplan            │    │   │
+│   │  └────────────────────┬───────────────────────────────────────┘    │   │
+│   │                       │                                             │   │
+│   │  ┌────────────────────▼───────────────────────────────────────┐    │   │
+│   │  │ STAGE 8: Terraform Apply                                   │    │   │
+│   │  │  Provision EC2 + Security Group on AWS                     │    │   │
+│   │  │  Apply complete! 0 added, 1 changed, 0 destroyed           │    │   │
+│   │  └────────────────────┬───────────────────────────────────────┘    │   │
+│   │                       │                                             │   │
+│   │  ┌────────────────────▼───────────────────────────────────────┐    │   │
+│   │  │ STAGE 9: Deployment Info                                   │    │   │
+│   │  │  Print Public IP and App URL from terraform output         │    │   │
+│   │  └────────────────────────────────────────────────────────────┘    │   │
+│   │                                                                     │   │
+│   │  Credentials Used:                                                  │   │
+│   │    dockerhub-creds (Username+PAT)                                   │   │
+│   │    aws-credentials (Access Key + Secret Key)                        │   │
+│   │    sonarqube-token (Secret Text)                                    │   │
+│   └──────────────────────────────┬──────────────────────────────────────┘   │
+│                                  │                                           │
+│   ┌──────────────────────────────▼──────────────────────────────────────┐   │
+│   │             SONARQUBE  (Docker, Port 9001)                          │   │
+│   │                                                                     │   │
+│   │  Image: sonarqube:lts-community                                     │   │
+│   │  DB: PostgreSQL 15 (sonarqube-db container)                         │   │
+│   │                                                                     │   │
+│   │  Reports: Bugs | Code Smells | Vulnerabilities | Coverage           │   │
+│   │  Project: ecommerce-analytics                                       │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└──────────────────────────────────┬──────────────────────────────────────────┘
+                                   │
+                    ┌──────────────▼──────────────┐
+                    │       DOCKERHUB REGISTRY     │
+                    │   hub.docker.com             │
+                    │   jaybharuka18/              │
+                    │   ecommerce-analytics        │
+                    │                              │
+                    │   :1  :2  :3 ... :9 :latest  │
+                    └──────────────┬──────────────┘
+                                   │
+                    Stage 8: terraform apply
+                    (EC2 user_data pulls image on boot)
+                                   │
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     AWS CLOUD  (ap-south-1 / Mumbai)                        │
+│                                                                             │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                  SECURITY GROUP  (ecommerce-analytics-sg)           │   │
+│   │                  ID: sg-0ad7d1d3967aab012                           │   │
+│   │                                                                     │   │
+│   │   Inbound Rules:                    Outbound Rules:                 │   │
+│   │   ┌─────────────────────────┐       ┌──────────────────────────┐   │   │
+│   │   │ Port 22   — SSH         │       │ All traffic — 0.0.0.0/0  │   │   │
+│   │   │ Port 8501 — Streamlit   │       └──────────────────────────┘   │   │
+│   │   │ Port 3000 — Grafana     │                                       │   │
+│   │   │ Port 9090 — Prometheus  │                                       │   │
+│   │   └─────────────────────────┘                                       │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │          EC2 INSTANCE  (t3.micro, Ubuntu 24.04 LTS)                 │   │
+│   │          ID: i-01caec5e36bc79451                                    │   │
+│   │          IP: 15.206.145.177  (Public)                               │   │
+│   │                                                                     │   │
+│   │  ┌──────────────────┐  ┌──────────────────┐  ┌─────────────────┐  │   │
+│   │  │  STREAMLIT APP   │  │   PROMETHEUS      │  │    GRAFANA      │  │   │
+│   │  │  Docker Container│  │  Docker Container │  │ Docker Container│  │   │
+│   │  │                  │  │                   │  │                 │  │   │
+│   │  │  Port: 8501      │  │  Port: 9090       │  │  Port: 3000     │  │   │
+│   │  │  Image:          │  │  Scrapes metrics  │  │  Dashboards     │  │   │
+│   │  │  jaybharuka18/   │  │  from Node Export │  │  Datasource:    │  │   │
+│   │  │  ecommerce-      │  │  + App endpoints  │  │  Prometheus     │  │   │
+│   │  │  analytics:9     │  │                   │  │  Dashboard:1860 │  │   │
+│   │  └──────────────────┘  └────────┬──────────┘  └────────┬────────┘  │   │
+│   │                                  │  scrapes              │  queries  │   │
+│   │  ┌──────────────────┐            │                       │           │   │
+│   │  │  NODE EXPORTER   │ ◀──────────┘                       │           │   │
+│   │  │  Docker Container│                                     │           │   │
+│   │  │                  │ ◀─────────────────────────────────┘           │   │
+│   │  │  Port: 9100      │                                                │   │
+│   │  │  Host CPU/RAM/   │                                                │   │
+│   │  │  Disk/Network    │                                                │   │
+│   │  └──────────────────┘                                                │   │
+│   │                                                                     │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                        │              │              │
+                        ▼              ▼              ▼
+             http://IP:8501   http://IP:9090   http://IP:3000
+               Streamlit App   Prometheus UI   Grafana Dashboards
 
 
-┌─────────────────────────────────────────────────────────────────┐
-│                  FUTURE: TERRAFORM + AWS CLOUD                  │
-│                       (Infrastructure Layer)                    │
-│                                                                 │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │              TERRAFORM (Infrastructure as Code)          │  │
-│  │                                                          │  │
-│  │  • Defines AWS Resources                                │  │
-│  │  • Security Groups                                      │  │
-│  │  • EC2 Instance Configuration                           │  │
-│  └──────────────────────────────────────────────────────────┘  │
-│                         │                                       │
-│                         │ terraform apply                       │
-│                         ▼                                       │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │                      AWS CLOUD                           │  │
-│  │                   Region: ap-south-1                     │  │
-│  │                                                          │  │
-│  │  ┌────────────────────────────────────────────────────┐ │  │
-│  │  │  EC2 Instance (t2.micro)                           │ │  │
-│  │  │  • Ubuntu 24.04 LTS                                │ │  │
-│  │  │  • Docker Installed                                │ │  │
-│  │  │  • Application Container Running                   │ │  │
-│  │  └────────────────────────────────────────────────────┘ │  │
-│  │                                                          │  │
-│  │  ┌────────────────────────────────────────────────────┐ │  │
-│  │  │  Security Group                                    │ │  │
-│  │  │  • Port 22 (SSH)                                   │ │  │
-│  │  │  • Port 8501 (Streamlit)                           │ │  │
-│  │  │  • Outbound: All Traffic                           │ │  │
-│  │  └────────────────────────────────────────────────────┘ │  │
-│  │                                                          │  │
-│  └──────────────────────────────────────────────────────────┘  │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+================================================================================
+                         TOOLS LAYER (Review 2)
+================================================================================
+
+┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌───────────┐
+│     Git     │ │   GitHub    │ │   Jenkins   │ │   Docker    │ │ DockerHub │
+│  (Version   │ │ (Repository │ │   (CI/CD)   │ │ (Container  │ │ (Registry)│
+│  Control)   │ │  Hosting)   │ │  9 Stages   │ │  Runtime)   │ │           │
+└─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘ └───────────┘
+
+┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌───────────┐
+│  Terraform  │ │     AWS     │ │  SonarQube  │ │ Prometheus  │ │  Grafana  │
+│   (IaC)     │ │  EC2+SG     │ │  (Code Qual)│ │ (Metrics)   │ │(Dashboard)│
+│  v1.14.8    │ │ ap-south-1  │ │ Port 9001   │ │ Port 9090   │ │ Port 3000 │
+└─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘ └───────────┘
+
+┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+│   Python    │ │  Streamlit  │ │    Node     │
+│   3.9 Slim  │ │   (App)     │ │  Exporter   │
+│             │ │  Port 8501  │ │  Port 9100  │
+└─────────────┘ └─────────────┘ └─────────────┘
 
 
-## TOOLS LAYER (Show as icons/boxes at bottom)
+================================================================================
+                         DATA / METRICS FLOW
+================================================================================
 
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│     Git      │ │   GitHub     │ │   Jenkins    │ │    Docker    │
-│   (Version   │ │  (Repository │ │   (CI/CD)    │ │ (Container)  │
-│   Control)   │ │   Hosting)   │ │              │ │              │
-└──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘
+  Node Exporter (9100) ──scrapes──▶ Prometheus (9090) ──queries──▶ Grafana (3000)
+                                          │                              │
+                                    stores metrics              visualizes on
+                                    time-series DB              Dashboard #1860
+                                                                (Node Exporter)
 
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│  Terraform   │ │     AWS      │ │  Streamlit   │ │   Python     │
-│    (IaC)     │ │   (Cloud)    │ │   (App)      │ │   3.9        │
-│              │ │              │ │              │ │              │
-└──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘
+  SonarQube (9001) ◀──scan──  Jenkins Stage 2  ──reports──▶ sonarqube-token
 
 
-## COLOR CODING SUGGESTIONS FOR DIAGRAM:
+================================================================================
+                         TERRAFORM STATE MANAGEMENT
+================================================================================
 
-Developer Layer:        Blue (#4A90E2)
-GitHub:                 Black (#333333)
-Jenkins:                Red (#D33833)
-Docker:                 Blue (#0DB7ED)
-AWS:                    Orange (#FF9900)
-Terraform:              Purple (#7B42BC)
-Application:            Green (#4CAF50)
+  Jenkins Volume:  /var/jenkins_home/terraform-state/terraform.tfstate
+                        │
+                        │  persists across builds
+                        ▼
+  terraform init  ──reads──▶ existing EC2 + SG state
+  terraform plan  ──shows──▶ only changed attributes (e.g. user_data image tag)
+  terraform apply ──updates──▶ EC2 in-place (no recreation)
 
-## ARROWS MEANING:
 
-Solid Arrow (─────▶)    : Automated Process
-Dashed Arrow (- - - ▶)  : Manual Trigger
-Double Arrow (═════▶)   : Data Flow
+================================================================================
+                         COLOR CODING (for Draw.io / PowerPoint)
+================================================================================
+
+  Developer / Local:    Blue      (#4A90E2)
+  GitHub:               Dark      (#333333)
+  Jenkins Pipeline:     Red       (#D33833)
+  Docker:               Teal      (#0DB7ED)
+  DockerHub:            Blue      (#066DA5)
+  AWS Cloud:            Orange    (#FF9900)
+  Terraform:            Purple    (#7B42BC)
+  Application (App):    Green     (#4CAF50)
+  Monitoring Stack:      Amber    (#F5A623)
+  SonarQube:            Blue-Grey (#4A90D9)
+
+================================================================================
+                         ARROWS MEANING
+================================================================================
+
+  ─────▶   Automated trigger / push
+  - - -▶   Manual action (Build Now)
+  ═════▶   Data / metrics flow
+  ◀─────   Pull / scrape
