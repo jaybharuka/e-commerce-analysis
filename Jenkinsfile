@@ -81,7 +81,13 @@ pipeline {
                                     -e SONAR_HOST_URL=${SONAR_HOST_URL} \\
                                     -e SONAR_TOKEN=${SONAR_TOKEN} \\
                                     -v \$(pwd):/usr/src \\
-                                    sonarsource/sonar-scanner-cli:latest
+                                    sonarsource/sonar-scanner-cli:latest \\
+                                    -Dsonar.projectKey=ecommerce-analytics \\
+                                    -Dsonar.projectName="E-Commerce Analytics" \\
+                                    -Dsonar.sources=streamlit,ml_analysis \\
+                                    -Dsonar.language=py \\
+                                    -Dsonar.python.version=3.9 \\
+                                    -Dsonar.exclusions=**/__pycache__/**,**/*.pyc,**/node_modules/**,ml_results/**
                             """
                         }
                         echo "==> SonarQube analysis complete. View results at ${SONAR_HOST_URL}"
