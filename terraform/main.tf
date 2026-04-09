@@ -163,4 +163,8 @@ resource "aws_instance" "app" {
     Environment = var.environment
     ManagedBy   = "Terraform"
   }
+
+  lifecycle {
+    ignore_changes = [user_data]
+  }
 }
