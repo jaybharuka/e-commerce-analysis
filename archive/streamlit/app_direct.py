@@ -188,7 +188,7 @@ if os.path.exists(seg_file):
                 title='Total Revenue by Segment',
                 color_discrete_sequence=['#2A9D8F']
             )
-            fig_value.update_xaxis(tickangle=-45)
+            fig_value.update_xaxes(tickangle=-45)
             st.plotly_chart(fig_value, use_container_width=True)
         
         # Segment metrics
