@@ -15,12 +15,14 @@
 // Jenkins Credentials required (configure at
 //   Manage Jenkins → Credentials → System → Global):
 //
-//   ID                  Kind                    Usage
-//   ─────────────────── ─────────────────────── ─────────────────────────────
-//   dockerhub-creds     Username with password  DockerHub login
-//   aws-credentials     Username with password  AWS_ACCESS_KEY_ID (username)
-//                                               AWS_SECRET_ACCESS_KEY (password)
-//   sonarqube-token     Secret text             SonarQube user token
+//   ID                       Kind                    Usage
+//   ──────────────────────── ─────────────────────── ──────────────────────────────────
+//   dockerhub-creds          Username with password  DockerHub login
+//   aws-credentials          Username with password  AWS_ACCESS_KEY_ID (username)
+//                                                    AWS_SECRET_ACCESS_KEY (password)
+//   sonarqube-token          Secret text             SonarQube user token
+//   grafana-admin-password   Secret text             Grafana admin password
+//                                                    (injected as TF_VAR_grafana_admin_password)
 // ============================================================
 
 pipeline {
@@ -63,7 +65,25 @@ pipeline {
             }
         }
 
-        // ── 2. SonarQube Analysis ─────────────────────────────────────────
+        // ── 2. Unit Tests ─────────────────────────────────────────────────
+        stage('Unit Tests') {
+            steps {
+                script {
+                    echo "==> Running unit tests..."
+                    sh """
+                        pip install pytest pyspark --quiet
+                        pytest tests/ -v --tb=short --junit-xml=test-results.xml
+                    """
+                }
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'test-results.xml'
+                }
+            }
+        }
+
+        // ── 3. SonarQube Analysis ─────────────────────────────────────────
         stage('SonarQube Analysis') {
             steps {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
@@ -193,6 +213,10 @@ pipeline {
                             credentialsId: 'aws-credentials',
                             usernameVariable: 'AWS_ACCESS_KEY_ID',
                             passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ),
+                        string(
+                            credentialsId: 'grafana-admin-password',
+                            variable: 'TF_VAR_grafana_admin_password'
                         )
                     ]) {
                         sh """
@@ -218,6 +242,10 @@ pipeline {
                             credentialsId: 'aws-credentials',
                             usernameVariable: 'AWS_ACCESS_KEY_ID',
                             passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ),
+                        string(
+                            credentialsId: 'grafana-admin-password',
+                            variable: 'TF_VAR_grafana_admin_password'
                         )
                     ]) {
                         sh """

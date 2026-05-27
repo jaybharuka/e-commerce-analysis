@@ -169,7 +169,7 @@ resource "aws_instance" "app" {
         --net=host \
         --name grafana \
         --restart always \
-        -e GF_SECURITY_ADMIN_PASSWORD=admin123 \
+        -e GF_SECURITY_ADMIN_PASSWORD=${var.grafana_admin_password} \
         grafana/grafana:latest
     echo "[$(date)] Grafana started on port 3000."
 

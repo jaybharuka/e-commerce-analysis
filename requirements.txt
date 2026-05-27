@@ -1,6 +1,18 @@
-streamlit
-pyhive
-pandas
-plotly
-thrift
-thrift-sasl
+# ── Streamlit dashboard ────────────────────────────────────────────────────
+streamlit==1.35.0
+
+# ── Hive connectivity ──────────────────────────────────────────────────────
+pyhive==0.7.0
+thrift==0.16.0
+thrift-sasl==0.4.3
+sasl==0.3.1                  # native SASL required by thrift-sasl on Linux
+
+# ── Data wrangling ─────────────────────────────────────────────────────────
+pandas==2.2.2
+
+# ── Visualisation ──────────────────────────────────────────────────────────
+plotly==5.22.0
+
+# ── Testing ────────────────────────────────────────────────────────────────
+pytest==8.2.2
+pyspark==3.5.1               # must match the Spark version in your Docker images

@@ -78,9 +78,19 @@ user_recs_flat = user_recs.select(
     explode(col("recommendations")).alias("rec")
 ).select(
     "CustomerID",
-    col("rec.StockCode").alias("RecommendedProduct"),
+    # ALS emits the item column used at training time (StockCodeIndex), not the original StockCode
+    col("rec.StockCodeIndex").alias("RecommendedProductIndex"),
     col("rec.rating").alias("RecommendationScore")
 )
+
+# Reverse-map StockCodeIndex back to StockCode using the fitted indexer
+# Build an index→StockCode lookup from the indexer labels
+index_to_stock = spark.createDataFrame(
+    [(float(i), label) for i, label in enumerate(indexer_model.labels)],
+    ["StockCodeIndex", "StockCode"]
+)
+
+user_recs_mapped = user_recs_flat.join(index_to_stock, on="StockCodeIndex", how="left")
 
 # Add product descriptions
 products = spark.sql("""
@@ -89,16 +99,16 @@ products = spark.sql("""
     WHERE StockCode IS NOT NULL AND Description IS NOT NULL
 """)
 
-recommendations_with_desc = user_recs_flat.join(
+recommendations_with_desc = user_recs_mapped.join(
     products,
-    user_recs_flat.RecommendedProduct == products.StockCode,
-    "left"
+    on="StockCode",
+    how="left"
 )
 
 # Save recommendations
 recommendations_with_desc.select(
     "CustomerID",
-    "RecommendedProduct",
+    col("StockCode").alias("RecommendedProduct"),
     "Description",
     "RecommendationScore"
 ).write \
@@ -110,9 +120,11 @@ recommendations_with_desc.select(
 print("=" * 50)
 print("Product Recommendation Model Results")
 print("=" * 50)
-print(f"Total Customers: {user_recs.count()}")
-print(f"Total Recommendations: {user_recs_flat.count()}")
-print(f"Average Recommendations per Customer: {user_recs_flat.count() / user_recs.count():.2f}")
+total_customers = user_recs.count()
+total_recs = user_recs_flat.count()
+print(f"Total Customers: {total_customers}")
+print(f"Total Recommendations: {total_recs}")
+print(f"Average Recommendations per Customer: {total_recs / total_customers:.2f}")
 
 print("\nSample Recommendations:")
 recommendations_with_desc.limit(20).show(truncate=False)

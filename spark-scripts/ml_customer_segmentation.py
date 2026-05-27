@@ -22,8 +22,9 @@ spark.sql("DROP TABLE IF EXISTS customer_segments")
 customer_metrics_df = spark.sql("SELECT * FROM customer_metrics WHERE CustomerID IS NOT NULL")
 
 # Prepare features for clustering
+# Column names match transform.py output: TotalPurchases, NumberOfTransactions
 assembler = VectorAssembler(
-    inputCols=["total_spent", "total_orders"],
+    inputCols=["TotalPurchases", "NumberOfTransactions"],
     outputCol="features"
 )
 
@@ -55,8 +56,8 @@ predictions_with_labels = predictions.withColumn(
 # Save results to new Hive table
 predictions_with_labels.select(
     "CustomerID",
-    "total_spent",
-    "total_orders",
+    "TotalPurchases",
+    "NumberOfTransactions",
     col("prediction").alias("SegmentID"),
     "SegmentName"
 ).write \
@@ -71,7 +72,7 @@ print("=" * 50)
 
 centers = model.clusterCenters()
 for i, center in enumerate(centers):
-    print(f"Cluster {i}: TotalPurchases={center[0]:.2f}, Transactions={center[1]:.2f}")
+    print(f"Cluster {i}: TotalPurchases(scaled)={center[0]:.2f}, NumberOfTransactions(scaled)={center[1]:.2f}")
 
 # Count customers per segment
 segment_counts = predictions_with_labels.groupBy("SegmentName").count().orderBy("count", ascending=False)

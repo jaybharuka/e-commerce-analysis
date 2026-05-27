@@ -50,3 +50,11 @@ variable "environment" {
   type        = string
   default     = "production"
 }
+
+variable "grafana_admin_password" {
+  description = "Grafana admin password. Pass via TF_VAR_grafana_admin_password env var or Jenkins secret; never hardcode."
+  type        = string
+  sensitive   = true
+  # No default — must be supplied explicitly so the pipeline fails fast
+  # if the secret is not configured rather than silently using a weak value.
+}
