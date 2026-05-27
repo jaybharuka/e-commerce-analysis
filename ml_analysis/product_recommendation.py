@@ -25,8 +25,8 @@ from sklearn.preprocessing import StandardScaler
 warnings.filterwarnings('ignore')
 
 # Configuration
-DATA_FILE = 'data/data.csv'
-OUTPUT_DIR = 'ml_results'
+DATA_FILE = '../data/data.csv'
+OUTPUT_DIR = '../ml_results'
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 

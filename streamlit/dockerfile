@@ -1,16 +1,56 @@
+# ============================================================
+# Dockerfile — Streamlit E-Commerce Analytics App
+# Base : python:3.9-slim
+# Port : 8501
+# ============================================================
+
 FROM python:3.9-slim
 
-# Set the working directory
+# ── Metadata ──────────────────────────────────────────────
+LABEL maintainer="jaybharuka"
+LABEL org.opencontainers.image.title="ecommerce-analytics"
+LABEL org.opencontainers.image.description="Streamlit E-Commerce Analytics Dashboard"
+LABEL org.opencontainers.image.source="https://github.com/jaybharuka/e-commerce-analysis"
+
+# ── Environment ────────────────────────────────────────────
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# ── Working directory ──────────────────────────────────────
 WORKDIR /app
 
-# Install dependencies
-RUN pip install --no-cache-dir streamlit pyhive pandas plotly thrift thrift-sasl
+# ── System dependencies ────────────────────────────────────
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+        libsasl2-dev \
+        libldap2-dev \
+        libssl-dev \
+        gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the application code
+# ── Python dependencies ────────────────────────────────────
+# Copy requirements first to leverage Docker layer caching.
+# Rebuilds only when requirements change, not on every code edit.
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# ── Application code ───────────────────────────────────────
 COPY streamlit/ /app/
 
-# Expose the default Streamlit port
+# ── Non-root user for security ─────────────────────────────
+RUN useradd -m -u 1001 appuser && chown -R appuser:appuser /app
+USER appuser
+
+# ── Port ───────────────────────────────────────────────────
 EXPOSE 8501
 
-# Use CMD to run the Streamlit application
-CMD ["streamlit", "run", "app_complete.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# ── Health check ───────────────────────────────────────────
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health')"
+
+# ── Entrypoint ─────────────────────────────────────────────
+CMD ["streamlit", "run", "app_complete.py", \
+     "--server.port=8501", \
+     "--server.address=0.0.0.0", \
+     "--server.headless=true", \
+     "--server.enableCORS=false"]

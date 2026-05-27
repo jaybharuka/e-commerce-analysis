@@ -41,8 +41,8 @@ except ImportError:
     from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
 
 # Configuration
-DATA_FILE = 'data/data.csv'
-OUTPUT_DIR = 'ml_results'
+DATA_FILE = '../data/data.csv'
+OUTPUT_DIR = '../ml_results'
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
