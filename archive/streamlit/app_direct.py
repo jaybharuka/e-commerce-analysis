@@ -248,6 +248,115 @@ else:
 
 st.markdown("---")
 
+# === CHURN PREDICTION ===
+st.header("⚠️ Churn Prediction")
+
+churn_file = os.path.join(ML_RESULTS_DIR, 'churn_prediction.csv')
+churn_summary_file = os.path.join(ML_RESULTS_DIR, 'churn_model_summary.csv')
+
+if os.path.exists(churn_file):
+    try:
+        churn_data = pd.read_csv(churn_file)
+
+        # ── Top-line metrics ──────────────────────────────────────────────
+        total = len(churn_data)
+        high   = (churn_data['ChurnRiskLevel'] == 'High').sum()
+        medium = (churn_data['ChurnRiskLevel'] == 'Medium').sum()
+        low    = (churn_data['ChurnRiskLevel'] == 'Low').sum()
+        avg_risk = churn_data['ChurnRisk'].mean() * 100
+
+        m1, m2, m3, m4, m5 = st.columns(5)
+        m1.metric("Total Customers",  f"{total:,}")
+        m2.metric("High Risk",        f"{high:,}",   f"{high/total*100:.1f}%")
+        m3.metric("Medium Risk",      f"{medium:,}", f"{medium/total*100:.1f}%")
+        m4.metric("Low Risk",         f"{low:,}",    f"{low/total*100:.1f}%")
+        m5.metric("Avg Churn Risk",   f"{avg_risk:.1f}%")
+
+        col1, col2 = st.columns(2)
+
+        # ── Risk level distribution ───────────────────────────────────────
+        with col1:
+            risk_counts = (
+                churn_data['ChurnRiskLevel']
+                .value_counts()
+                .reindex(['High', 'Medium', 'Low'])
+                .reset_index()
+            )
+            risk_counts.columns = ['Risk Level', 'Count']
+
+            fig_risk = px.bar(
+                risk_counts,
+                x='Risk Level', y='Count',
+                title='Churn Risk Distribution',
+                color='Risk Level',
+                color_discrete_map={
+                    'High':   '#E76F51',
+                    'Medium': '#F4A261',
+                    'Low':    '#2A9D8F',
+                },
+                text='Count',
+            )
+            fig_risk.update_traces(textposition='outside')
+            fig_risk.update_layout(showlegend=False)
+            st.plotly_chart(fig_risk, use_container_width=True)
+
+        # ── Feature importance ────────────────────────────────────────────
+        with col2:
+            if os.path.exists(churn_summary_file):
+                importance_df = pd.read_csv(churn_summary_file)
+                fig_imp = px.bar(
+                    importance_df.sort_values('Importance'),
+                    x='Importance', y='Feature',
+                    orientation='h',
+                    title='XGBoost Feature Importance',
+                    color='Importance',
+                    color_continuous_scale='Blues',
+                )
+                fig_imp.update_layout(coloraxis_showscale=False)
+                st.plotly_chart(fig_imp, use_container_width=True)
+
+        # ── Recency vs Monetary scatter ───────────────────────────────────
+        fig_scatter = px.scatter(
+            churn_data.sample(min(1000, len(churn_data)), random_state=42),
+            x='Recency', y='Monetary',
+            color='ChurnRiskLevel',
+            color_discrete_map={
+                'High':   '#E76F51',
+                'Medium': '#F4A261',
+                'Low':    '#2A9D8F',
+            },
+            size='ChurnRisk',
+            hover_data=['CustomerID', 'Frequency'],
+            title='Recency vs Monetary Value (dot size = churn probability)',
+            labels={'Recency': 'Days Since Last Purchase', 'Monetary': 'Total Spend ($)'},
+            category_orders={'ChurnRiskLevel': ['High', 'Medium', 'Low']},
+        )
+        st.plotly_chart(fig_scatter, use_container_width=True)
+
+        # ── Top 10 high-risk customers ────────────────────────────────────
+        st.subheader("🚨 Top 10 Highest-Risk Customers")
+        top_risk = (
+            churn_data[churn_data['ChurnRiskLevel'] == 'High']
+            .nlargest(10, 'ChurnRisk')
+            [['CustomerID', 'ChurnRisk', 'Recency', 'Frequency', 'Monetary', 'TenureDays']]
+            .rename(columns={
+                'ChurnRisk':  'Churn Probability',
+                'Recency':    'Days Since Purchase',
+                'Frequency':  'Orders',
+                'Monetary':   'Total Spend ($)',
+                'TenureDays': 'Tenure (days)',
+            })
+        )
+        top_risk['Churn Probability'] = (top_risk['Churn Probability'] * 100).round(1).astype(str) + '%'
+        st.dataframe(top_risk, use_container_width=True, hide_index=True)
+
+    except Exception as e:
+        st.error(f"Error loading churn data: {e}")
+else:
+    st.warning("⚠️ Churn prediction not available. Run `run_all_analyses.py` first.")
+
+st.markdown("---")
+
 # === SALES FORECAST ===
 st.header("📈 Sales Forecasting")
 
